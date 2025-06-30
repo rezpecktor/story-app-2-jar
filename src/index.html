@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>sharestory-web App</title>
+
+    <link rel="apple-touch-icon" href="images/logo.png" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="shortcut icon" href="images/logo.png" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+    <!-- Font Awesome 6.4.0 -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#800e13" />
+    <script src="https://unpkg.com/idb@7.1.1/build/umd.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="#main-content" class="skip-link" id="skip-link">Menuju Konten Utama APP</a>
+      <div class="header-content container">
+        <a class="brand-name__link" href="#/">
+          <img class="brand-name__link__image" src="images/story.svg" alt="Story App Logo" width="35" height="35" />
+          <span class="brand-name__link__text">Sharestory-web App</span>
+        </a>
+
+        <nav id="navigation-drawer" class="navigation-drawer">
+          <ul id="navlist-main" class="navigation-drawer__navlist-main"></ul>
+          <ul id="navlist" class="navigation-drawer__navlist"></ul>
+        </nav>
+
+        <button id="drawer-button" class="drawer-button">☰</button>
+      </div>
+    </header>
+
+    <main tabIndex="-1" id="main-content" class="main-content"></main>
+
+    <footer>
+      <div class="container">
+        <hr />
+        <div class="footer-content">
+          <a class="brand-name__link" href="#/">
+            <img class="brand-name__link__image" src="images/story.svg" alt="Story App Logo" width="35" height="35" />
+            <span class="brand-name__link__text">sharestory-web App</span>
+          </a>
+          <p class="copyright">&copy; 2025 Fajar Tampan.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

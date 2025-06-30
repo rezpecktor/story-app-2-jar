@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <rect width="300" height="300" fill="#f8f9fa" rx="10" ry="10"/>
+  <path d="M150,80 C130,60 100,60 80,80 C60,100 60,130 80,150 L150,220 L220,150 C240,130 240,100 220,80 C200,60 170,60 150,80 Z" stroke="#800e13" stroke-width="8" fill="none"/>
+  <line x1="100" y1="120" x2="200" y2="120" stroke="#800e13" stroke-width="8" stroke-linecap="round" stroke-dasharray="5,10"/>
+  <text x="150" y="260" text-anchor="middle" font-family="Arial" font-size="16" fill="#333">No Favorites Yet</text>
+</svg>
