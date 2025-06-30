@@ -1,7 +1,7 @@
 {
-  "name": "Fesnuk App",
-  "short_name": "Fesnuk App",
-  "description": "Share your memories with fesnuk app",
+  "name": "sharestory-web",
+  "short_name": "aplikasi share story-web",
+  "description": "aplikasi share story-web",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
