@@ -1,16 +1,18 @@
-import SwalNotification from "./notification"; // Import helper untuk notifikasi swal
+// Ganti seluruh isi file notification-helper.js dengan kode ini
+
+import SwalNotification from "./notification"; // Import utilitas notifikasi swal
 import CONFIG from "../config"; // Import konfigurasi (termasuk VAPID key)
 
-// Objek helper untuk mengelola notifikasi push dan service worker
+// Objek utilitas untuk mengelola notifikasi push dan service worker
 const NotificationHelper = {
   // Inisialisasi helper, menerima fungsi subscribe & unsubscribe dari luar
   async init({ subscribe, unsubscribe }) {
     this._subscribe = subscribe;
     this._unsubscribe = unsubscribe;
 
-    // Cek dukungan Notification API
+    // Periksa apakah Notification API didukung
     if (!("Notification" in window)) {
-      console.log("Browser ini tidak mendukung notifikasi");
+      console.log("This browser does not support notifications");
       return;
     }
 
@@ -21,18 +23,18 @@ const NotificationHelper = {
   // Mendaftarkan service worker
   async _registerServiceWorker() {
     if (!("serviceWorker" in navigator)) {
-      console.log("Service Worker tidak didukung di browser ini");
+      console.log("Service Worker not supported in the browser");
       return;
     }
 
     try {
-      // Daftarkan service worker di root path agar cakupan luas
+      // Registrasi service worker di root path agar jangkauan maksimal
       const registration = await navigator.serviceWorker.register("/sw.js");
-      console.log("Service worker berhasil didaftarkan", registration);
+      console.log("Service worker registered", registration);
 
       return registration;
     } catch (error) {
-      console.error("Gagal mendaftarkan service worker", error);
+      console.error("Failed to register service worker", error);
       return null;
     }
   },
@@ -40,27 +42,27 @@ const NotificationHelper = {
   // Meminta izin notifikasi ke user, tampilkan dialog konfirmasi
   async requestPermission() {
     if (!("Notification" in window)) {
-      console.log("Browser ini tidak mendukung notifikasi");
+      console.log("This browser does not support notifications");
       return;
     }
 
     // Tampilkan dialog konfirmasi menggunakan SwalNotification
     const result = await SwalNotification.confirm({
-      title: "Aktifkan Notifikasi?",
-      text: "Kami akan mengirimkan info cerita baru dan update penting.",
+      title: "Enable Notifications?",
+      text: "We'll notify you about new stories and important updates",
       icon: "question",
-      confirmText: "Ya, Aktifkan",
-      cancelText: "Tidak, Terima kasih",
+      confirmText: "Yes, Enable",
+      cancelText: "No, Thanks",
     });
 
     if (result.isConfirmed) {
-      // Minta izin notifikasi dari browser
+      // Ajukan permintaan izin notifikasi ke browser
       const permission = await window.Notification.requestPermission();
 
       if (permission === "granted") {
         await this.subscribe(); // Lanjutkan subscribe jika diizinkan
       } else {
-        SwalNotification.info("Izin notifikasi ditolak");
+        SwalNotification.info("Notification permission denied");
       }
     }
   },
@@ -72,28 +74,28 @@ const NotificationHelper = {
       const existingSubscription = await registration.pushManager.getSubscription();
 
       if (existingSubscription) {
-        return existingSubscription; // Sudah subscribe
+        return existingSubscription; // Sudah terdaftar
       }
 
-      // Konversi VAPID public key ke Uint8Array
+      // Ubah VAPID public key ke Uint8Array
       const vapidPublicKey = CONFIG.PUSH_MSG_VAPID_PUBLIC_KEY;
       const convertedVapidKey = this._urlBase64ToUint8Array(vapidPublicKey);
 
-      // Subscribe ke push manager
+      // Lakukan subscribe ke push manager
       const newSubscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: convertedVapidKey,
       });
 
-      console.log("Berhasil subscribe ke push service", newSubscription);
+      console.log("Successfully subscribed to push service", newSubscription);
 
       await this._subscribe(newSubscription); // Simpan ke server
 
-      SwalNotification.success("Berhasil mengaktifkan notifikasi");
+      SwalNotification.success("Successfully subscribed to notifications");
       return newSubscription;
     } catch (error) {
-      console.error("Gagal subscribe ke push service", error);
-      SwalNotification.error(`Gagal subscribe: ${error.message}`);
+      console.error("Failed to subscribe to push service", error);
+      SwalNotification.error(`Failed to subscribe: ${error.message}`);
       return null;
     }
   },
@@ -111,16 +113,16 @@ const NotificationHelper = {
       await subscription.unsubscribe();
       await this._unsubscribe(); // Hapus dari server
 
-      SwalNotification.info("Berhasil menonaktifkan notifikasi");
+      SwalNotification.info("Successfully unsubscribed from notifications");
     } catch (error) {
-      console.error("Gagal unsubscribe dari push service", error);
-      SwalNotification.error(`Gagal menonaktifkan notifikasi: ${error.message}`);
+      console.error("Failed to unsubscribe from push service", error);
+      SwalNotification.error(`Failed to unsubscribe: ${error.message}`);
     }
   },
 
   // Mengecek apakah user sudah subscribe push notification
   async _isSubscribed() {
-    // Tambahkan pengecekan di sini
+    // Tambahkan pengecekan di sini untuk mengatasi error
     if (!("serviceWorker" in navigator) || !navigator.serviceWorker.ready) {
       return false;
     }
@@ -130,7 +132,7 @@ const NotificationHelper = {
       const subscription = await registration.pushManager.getSubscription();
       return !!subscription;
     } catch (error) {
-      console.error("Gagal memeriksa status subscription", error);
+      console.error("Error checking subscription status", error);
       return false;
     }
   },
@@ -153,18 +155,18 @@ const NotificationHelper = {
   // Mengirim notifikasi uji coba ke user
   async sendTestNotification() {
     try {
-      console.log("Mengirim notifikasi uji coba");
+      console.log("Sending test notification");
 
       if (!("Notification" in window)) {
-        SwalNotification.error("Notifikasi tidak didukung di browser ini");
+        SwalNotification.error("Notifications are not supported in this browser");
         return;
       }
 
       if (Notification.permission !== "granted") {
-        SwalNotification.warning("Izin notifikasi belum diberikan");
+        SwalNotification.warning("Notification permission not granted");
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
-          SwalNotification.error("Izin notifikasi ditolak");
+          SwalNotification.error("Permission denied for notifications");
           return;
         }
       }
@@ -176,8 +178,8 @@ const NotificationHelper = {
         // Jika pushManager tersedia, tampilkan notifikasi via service worker
         if ("pushManager" in registration) {
           const testPayload = {
-            title: "Notifikasi Uji Coba",
-            message: "Ini adalah notifikasi uji coba dari aplikasi!",
+            title: "Test Notification",
+            message: "This is a test notification from your app!",
             url: "/",
           };
 
@@ -191,24 +193,24 @@ const NotificationHelper = {
             },
           });
 
-          SwalNotification.success("Notifikasi uji coba berhasil dikirim!");
+          SwalNotification.success("Test notification sent!");
         } else {
-          // Fallback: pakai Notification API langsung
-          new Notification("Notifikasi Uji Coba", {
-            body: "Ini adalah notifikasi uji coba dari aplikasi!",
+          // Alternatif: gunakan Notification API langsung
+          new Notification("Test Notification", {
+            body: "This is a test notification from your app!",
             icon: "images/story.svg",
           });
         }
       } else {
-        // Fallback jika tidak ada service worker
-        new Notification("Notifikasi Uji Coba", {
-          body: "Ini adalah notifikasi uji coba (API browser dasar)",
+        // Alternatif jika tidak ada service worker
+        new Notification("Test Notification", {
+          body: "This is a test notification (basic browser API)",
           icon: "images/story.svg",
         });
       }
     } catch (error) {
-      console.error("Gagal mengirim notifikasi uji coba", error);
-      SwalNotification.error(`Gagal mengirim notifikasi uji coba: ${error.message}`);
+      console.error("Failed to send test notification", error);
+      SwalNotification.error(`Failed to send test notification: ${error.message}`);
     }
   },
 
@@ -229,21 +231,21 @@ const NotificationHelper = {
 
         const mainButton = document.createElement("button");
         mainButton.classList.add("btn", "notification-button");
-        mainButton.innerHTML = '<i class="fas fa-bell"></i> Notifikasi <i class="fas fa-caret-down"></i>';
+        mainButton.innerHTML = '<i class="fas fa-bell"></i> Notifications <i class="fas fa-caret-down"></i>';
 
         const dropdownContent = document.createElement("div");
         dropdownContent.className = "notification-dropdown-content";
 
         const testLink = document.createElement("a");
         testLink.href = "javascript:void(0)";
-        testLink.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Uji Coba';
+        testLink.innerHTML = '<i class="fas fa-paper-plane"></i> Send Test';
         testLink.addEventListener("click", async () => {
           await this.sendTestNotification();
         });
 
         const disableLink = document.createElement("a");
         disableLink.href = "javascript:void(0)";
-        disableLink.innerHTML = '<i class="fas fa-bell-slash"></i> Nonaktifkan';
+        disableLink.innerHTML = '<i class="fas fa-bell-slash"></i> Disable';
         disableLink.addEventListener("click", async () => {
           await this.unsubscribe();
           this.renderSubscribeButton(containerElement);
@@ -258,7 +260,7 @@ const NotificationHelper = {
         containerElement.appendChild(buttonContainer);
       } else {
         // Jika belum subscribe, tampilkan tombol enable
-        button.innerHTML = '<i class="fas fa-bell"></i> Aktifkan Notifikasi';
+        button.innerHTML = '<i class="fas fa-bell"></i> Enable Notifications';
         button.addEventListener("click", async () => {
           await this.requestPermission();
           this.renderSubscribeButton(containerElement);
@@ -267,9 +269,9 @@ const NotificationHelper = {
         containerElement.appendChild(button);
       }
     } catch (error) {
-      console.error("Gagal menampilkan tombol notifikasi", error);
+      console.error("Failed to render subscribe button", error);
     }
   },
 };
 
-export default NotificationHelper; // Ekspor helper notifikasi
+export default NotificationHelper;

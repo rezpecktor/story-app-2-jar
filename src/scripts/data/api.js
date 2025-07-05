@@ -2,19 +2,19 @@ import CONFIG from "../config"; // Import konfigurasi API (BASE_URL, dll)
 import { getAccessToken } from "../utils/auth"; // Import fungsi untuk mengambil token akses user
 import StoryIdb from "../utils/database"; // Import modul untuk akses IndexedDB (penyimpanan offline)
 
-// Daftar endpoint API yang digunakan aplikasi
+// Kumpulan endpoint API yang digunakan aplikasi
 const ENDPOINTS = {
-  REGISTER: `${CONFIG.BASE_URL}/register`, // Endpoint untuk registrasi user
-  LOGIN: `${CONFIG.BASE_URL}/login`, // Endpoint untuk login user
+  REGISTER: `${CONFIG.BASE_URL}/register`, // Endpoint untuk mendaftar user baru
+  LOGIN: `${CONFIG.BASE_URL}/login`, // Endpoint untuk autentikasi user
   STORIES: `${CONFIG.BASE_URL}/stories`, // Endpoint untuk mengambil/menambah story
-  SUBSCRIBE: `${CONFIG.BASE_URL}/notifications/subscribe`, // Endpoint untuk subscribe notifikasi push
-  UNSUBSCRIBE: `${CONFIG.BASE_URL}/notifications/unsubscribe`, // Endpoint untuk unsubscribe notifikasi push
+  SUBSCRIBE: `${CONFIG.BASE_URL}/notifications/subscribe`, // Endpoint untuk mendaftar notifikasi push
+  UNSUBSCRIBE: `${CONFIG.BASE_URL}/notifications/unsubscribe`, // Endpoint untuk berhenti langganan notifikasi push
 };
 
-// Fungsi helper untuk cek apakah user sedang online
+// Fungsi utilitas untuk memeriksa status online user
 const isOnline = () => navigator.onLine;
 
-// Fungsi helper untuk membuat response palsu saat offline
+// Fungsi utilitas untuk membuat response palsu jika offline
 const createOfflineResponse = (endpoint) => {
   // Jika endpoint stories, kembalikan data kosong
   if (endpoint.includes("/stories")) {
@@ -28,24 +28,24 @@ const createOfflineResponse = (endpoint) => {
   // Untuk endpoint lain, kembalikan error offline
   return {
     error: true,
-    message: "Anda sedang offline. Silakan periksa koneksi internet Anda.",
+    message: "You are offline. Please check your connection.",
     ok: false,
   };
 };
 
-// Fungsi untuk registrasi user baru
+// Fungsi untuk mendaftarkan user baru
 export async function registerUser({ name, email, password }) {
   if (!isOnline()) {
-    // Jika offline, kembalikan error
+    // Jika tidak terhubung internet, kembalikan error
     return {
       error: true,
-      message: "Anda sedang offline. Silakan periksa koneksi untuk registrasi.",
+      message: "You are offline. Please check your connection to register.",
       ok: false,
     };
   }
 
   try {
-    // Kirim data registrasi ke endpoint REGISTER
+    // Kirim data pendaftaran ke endpoint REGISTER
     const data = JSON.stringify({ name, email, password });
     const fetchResponse = await fetch(ENDPOINTS.REGISTER, {
       method: "POST",
@@ -64,7 +64,7 @@ export async function registerUser({ name, email, password }) {
     // Jika gagal, kembalikan error
     return {
       error: true,
-      message: "Registrasi gagal. Silakan coba lagi nanti.",
+      message: "Registration failed. Please try again later.",
       ok: false,
     };
   }
@@ -73,10 +73,10 @@ export async function registerUser({ name, email, password }) {
 // Fungsi untuk login user
 export async function loginUser({ email, password }) {
   if (!isOnline()) {
-    // Jika offline, kembalikan error
+    // Jika tidak online, kembalikan error
     return {
       error: true,
-      message: "Anda sedang offline. Silakan periksa koneksi untuk login.",
+      message: "You are offline. Please check your connection to login.",
       ok: false,
     };
   }
@@ -102,7 +102,7 @@ export async function loginUser({ email, password }) {
     // Jika gagal, kembalikan error
     return {
       error: true,
-      message: "Login gagal. Silakan coba lagi nanti.",
+      message: "Login failed. Please try again later.",
       ok: false,
     };
   }
@@ -116,13 +116,13 @@ export async function getStories() {
     // Jika offline, coba ambil dari IndexedDB
     try {
       const stories = await StoryIdb.getStories();
-      console.log("Mengambil stories dari IndexedDB:", stories.length);
+      console.log("Retrieved stories from IndexedDB:", stories.length);
 
       if (stories && stories.length > 0) {
         // Jika ada data di IndexedDB, kembalikan data tersebut
         return {
           error: false,
-          message: "Stories diambil dari database lokal",
+          message: "Stories fetched from local database",
           listStory: stories,
           ok: true,
           fromCache: true,
@@ -146,7 +146,7 @@ export async function getStories() {
         };
       }
     } catch (error) {
-      console.error("Gagal mengakses penyimpanan offline:", error);
+      console.error("Error accessing offline storage:", error);
     }
 
     // Jika tidak ada data sama sekali, kembalikan response offline
@@ -155,7 +155,7 @@ export async function getStories() {
 
   try {
     // Jika online, ambil data dari API
-    console.log("Mengambil stories dari API...");
+    console.log("Fetching stories from API...");
     const fetchResponse = await fetch(ENDPOINTS.STORIES, {
       method: "GET",
       headers: {
@@ -165,13 +165,13 @@ export async function getStories() {
 
     if (!fetchResponse.ok) {
       // Jika API error, fallback ke IndexedDB
-      console.error("API error:", fetchResponse.status, fetchResponse.statusText);
+      console.error("API returned error:", fetchResponse.status, fetchResponse.statusText);
 
       const stories = await StoryIdb.getStories();
       if (stories && stories.length > 0) {
         return {
           error: false,
-          message: "Stories diambil dari database lokal (fallback API error)",
+          message: "Stories fetched from local database (API error fallback)",
           listStory: stories,
           ok: true,
           fromCache: true,
@@ -182,12 +182,12 @@ export async function getStories() {
     }
 
     const json = await fetchResponse.json();
-    console.log("Stories berhasil diambil");
+    console.log("Stories fetched successfully");
 
     // Simpan ke IndexedDB untuk akses offline
     if (json.listStory && json.listStory.length) {
       await StoryIdb.putStories(json.listStory);
-      console.log("Stories disimpan ke IndexedDB");
+      console.log("Saved stories to IndexedDB");
     }
 
     return {
@@ -196,13 +196,13 @@ export async function getStories() {
     };
   } catch (error) {
     // Jika error, fallback ke IndexedDB
-    console.error("Gagal mengambil stories:", error);
+    console.error("Error fetching stories:", error);
 
     const stories = await StoryIdb.getStories();
     if (stories && stories.length > 0) {
       return {
         error: false,
-        message: "Stories diambil dari database lokal (fallback error)",
+        message: "Stories fetched from local database (error fallback)",
         listStory: stories,
         ok: true,
         fromCache: true,
@@ -216,7 +216,7 @@ export async function getStories() {
 // Fungsi untuk membuat story baru (upload foto & deskripsi)
 export async function createNewStory({ description, photo, lat, lon }) {
   if (!isOnline()) {
-    // Jika offline, simpan story ke IndexedDB sebagai pending
+    // Jika sedang offline, simpan story ke IndexedDB sebagai pending
     try {
       const pendingStory = {
         id: `pending-${Date.now()}`,
@@ -226,22 +226,22 @@ export async function createNewStory({ description, photo, lat, lon }) {
         lon,
         isPending: true,
         createdAt: new Date().toISOString(),
-        name: "Anda (pending)", // Placeholder nama
+        name: "You (pending)", // Nama sementara
       };
 
       await StoryIdb.putStory(pendingStory);
 
       return {
         error: false,
-        message: "Cerita disimpan secara lokal dan akan diunggah saat online.",
+        message: "Story saved locally and will be uploaded when you're online",
         ok: true,
         isPending: true,
       };
     } catch (error) {
-      console.error("Gagal menyimpan pending story:", error);
+      console.error("Error saving pending story:", error);
       return {
         error: true,
-        message: "Gagal menyimpan cerita secara lokal. Silakan coba lagi saat online.",
+        message: "Failed to save story locally. Please try again when online.",
         ok: false,
       };
     }
@@ -249,7 +249,7 @@ export async function createNewStory({ description, photo, lat, lon }) {
 
   // Validasi file foto
   if (!photo || !(photo instanceof File)) {
-    throw new Error("Foto tidak valid: Harus berupa File object.");
+    throw new Error("Invalid photo: Expected a valid File object.");
   }
 
   if (photo.size > 1024 * 1024) {
@@ -288,7 +288,7 @@ export async function createNewStory({ description, photo, lat, lon }) {
   } catch (error) {
     return {
       error: true,
-      message: "Gagal membuat cerita. Silakan coba lagi nanti.",
+      message: "Failed to create story. Please try again later.",
       ok: false,
     };
   }
@@ -299,7 +299,7 @@ export async function syncPendingStories() {
   if (!isOnline()) {
     return {
       error: true,
-      message: "Tidak dapat sinkronisasi cerita saat offline.",
+      message: "Cannot sync stories while offline",
       ok: false,
     };
   }
@@ -314,12 +314,12 @@ export async function syncPendingStories() {
     if (pendingStories.length === 0) {
       return {
         error: false,
-        message: "Tidak ada cerita pending untuk disinkronkan.",
+        message: "No pending stories to sync",
         ok: true,
       };
     }
 
-    console.log(`Ditemukan ${pendingStories.length} cerita pending untuk disinkronkan`);
+    console.log(`Found ${pendingStories.length} pending stories to sync`);
 
     // Upload satu per satu story pending
     const results = await Promise.all(
@@ -333,7 +333,7 @@ export async function syncPendingStories() {
           });
 
           if (result.ok) {
-            // Jika sukses, hapus dari IndexedDB
+            // Jika berhasil, hapus dari IndexedDB
             await StoryIdb.deleteStory(story.id);
             return { success: true, id: story.id };
           } else {
@@ -349,38 +349,48 @@ export async function syncPendingStories() {
 
     return {
       error: false,
-      message: `Berhasil sinkronisasi ${successCount} dari ${pendingStories.length} cerita pending`,
+      message: `Synced ${successCount} of ${pendingStories.length} pending stories`,
       ok: true,
       results,
     };
   } catch (error) {
-    console.error("Gagal sinkronisasi cerita pending:", error);
+    console.error("Error syncing pending stories:", error);
     return {
       error: true,
-      message: "Gagal sinkronisasi cerita pending: " + error.message,
+      message: "Failed to sync pending stories: " + error.message,
       ok: false,
     };
   }
 }
 
-// story-app-2/src/scripts/data/api.js
-
+// Fungsi untuk subscribe push notification ke server
 export async function subscribePushNotification(subscription) {
   if (!isOnline()) {
     return {
       error: true,
-      message: "Subscription akan diproses saat Anda kembali online.",
+      message: "Subscription will be processed when you're back online.",
       ok: false,
     };
   }
 
   const token = getAccessToken();
   if (!token) {
-    throw new Error("User harus login untuk subscribe notifikasi");
+    throw new Error("User must be logged in to subscribe to notifications");
   }
 
   try {
-    console.log("Mengirim subscription ke server:", subscription);
+    // --- Bagian ini menyiapkan data subscription sebelum dikirim ke server ---
+    const subscriptionJSON = subscription.toJSON();
+    const dataToSend = {
+      endpoint: subscriptionJSON.endpoint,
+      keys: {
+        p256dh: subscriptionJSON.keys.p256dh,
+        auth: subscriptionJSON.keys.auth,
+      },
+    };
+    // ------------------------------------------------------------------------
+
+    console.log("Sending subscription to server:", dataToSend);
     console.log("Endpoint URL:", ENDPOINTS.SUBSCRIBE);
 
     const fetchResponse = await fetch(ENDPOINTS.SUBSCRIBE, {
@@ -389,8 +399,7 @@ export async function subscribePushNotification(subscription) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      // PERBAIKAN: Mengirim objek subscription secara langsung, bukan di dalam objek lain.
-      body: JSON.stringify(subscription),
+      body: JSON.stringify(dataToSend), // Mengirim data subscription yang sudah diformat
     });
 
     const json = await fetchResponse.json();
@@ -401,10 +410,10 @@ export async function subscribePushNotification(subscription) {
       ok: fetchResponse.ok,
     };
   } catch (error) {
-    console.error("Gagal subscribe:", error);
+    console.error("Subscription error:", error);
     return {
       error: true,
-      message: "Gagal subscribe. Silakan coba lagi nanti.",
+      message: "Failed to subscribe. Please try again later.",
       ok: false,
     };
   }
@@ -415,14 +424,14 @@ export async function unsubscribePushNotification() {
   if (!isOnline()) {
     return {
       error: true,
-      message: "Unsubscription akan diproses saat Anda kembali online.",
+      message: "Unsubscription will be processed when you're back online.",
       ok: false,
     };
   }
 
   const token = getAccessToken();
   if (!token) {
-    throw new Error("User harus login untuk unsubscribe notifikasi");
+    throw new Error("User must be logged in to unsubscribe from notifications");
   }
 
   try {
@@ -442,7 +451,7 @@ export async function unsubscribePushNotification() {
   } catch (error) {
     return {
       error: true,
-      message: "Gagal unsubscribe. Silakan coba lagi nanti.",
+      message: "Failed to unsubscribe. Please try again later.",
       ok: false,
     };
   }

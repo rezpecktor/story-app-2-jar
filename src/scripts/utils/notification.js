@@ -1,24 +1,24 @@
-import Swal from "sweetalert2"; // Import library SweetAlert2
+import Swal from "sweetalert2"; // Import SweetAlert2
 
-// Konfigurasi toast untuk notifikasi singkat di pojok atas
+// Pengaturan toast untuk notifikasi singkat di pojok kanan atas
 const Toast = Swal.mixin({
-  toast: true, // Mode toast (bukan modal)
-  position: "top-end", // Posisi toast di kanan atas layar
-  showConfirmButton: false, // Tidak tampilkan tombol konfirmasi
+  toast: true, // Mode toast, bukan dialog modal
+  position: "top-end", // Letak di kanan atas layar
+  showConfirmButton: false, // Tidak menampilkan tombol OK
   timer: 3000, // Durasi tampil 3 detik
-  timerProgressBar: true, // Tampilkan progress bar waktu
+  timerProgressBar: true, // Progress bar waktu tampil
   didOpen: (toast) => {
-    // Pause/resume timer saat mouse hover pada toast
+    // Timer berhenti saat mouse di atas, lanjut saat mouse keluar
     toast.addEventListener("mouseenter", Swal.stopTimer);
     toast.addEventListener("mouseleave", Swal.resumeTimer);
   },
   customClass: {
-    container: "swal-toast-container", // Kelas CSS custom untuk container toast
-    popup: "swal-toast-popup", // Kelas CSS custom untuk popup toast
+    container: "swal-toast-container", // Kelas CSS khusus untuk container toast
+    popup: "swal-toast-popup", // Kelas CSS khusus untuk popup toast
   },
 });
 
-// Objek helper untuk berbagai tipe notifikasi
+// Objek utilitas untuk berbagai jenis notifikasi
 const Notification = {
   // Notifikasi sukses (ikon hijau)
   success(message) {
@@ -55,21 +55,21 @@ const Notification = {
   // Dialog konfirmasi (modal dengan tombol Ya/Batal)
   confirm(options) {
     return Swal.fire({
-      title: options.title || "Konfirmasi",
+      title: options.title || "Are you sure?",
       text: options.text || "",
       icon: options.icon || "warning",
       showCancelButton: true,
       confirmButtonColor: "#14b8a6",
       cancelButtonColor: "#d33",
-      confirmButtonText: options.confirmText || "Ya",
-      cancelButtonText: options.cancelText || "Batal",
+      confirmButtonText: options.confirmText || "Yes",
+      cancelButtonText: options.cancelText || "Cancel",
     });
   },
 
   // Dialog alert/info (modal dengan satu tombol OK)
   alert(options) {
     return Swal.fire({
-      title: options.title || "Info",
+      title: options.title || "Notice",
       text: options.text || "",
       icon: options.icon || "info",
       confirmButtonColor: "#14b8a6",
@@ -77,4 +77,4 @@ const Notification = {
   },
 };
 
-export default Notification; // Ekspor helper notifikasi
+export default Notification; // Ekspor utilitas notifikasi
